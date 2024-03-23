@@ -13,7 +13,12 @@ LD_FLAGS = -L$(CUDA_DIR)/lib64 -lcuda -lcudart -lcublas
 
 NVCC = nvcc
 NVCC_FLAGS = -std=c++11 --compiler-options '-fPIC'
-ARCH = -gencode arch=compute_75,code=sm_75
+# ARCH = -gencode arch=compute_75,code=sm_75
+ARCH = -gencode arch=compute_75,code=sm_75 \
+       -gencode arch=compute_80,code=sm_80 \
+       -gencode arch=compute_86,code=sm_86 \
+       -gencode arch=compute_86,code=compute_86
+
 
 all: build/lib/libc_runtime_api.so
 
