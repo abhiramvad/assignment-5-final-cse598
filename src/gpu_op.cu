@@ -132,13 +132,13 @@ int DLGpuReduceSumAxisZero(const DLArrayHandle input, DLArrayHandle output) {
 	const float *inPtr = (const float *)input->data;
 	int threadsPerBlock = 1024;
 	if (totalElements <= threadsPerBlock){
-		threads.x = threadsNeeded;
+		threads.x = totalElements;
 		blocks.x = 1;
 	}else{
 		threads.x = threadsPerBlock;
 		blocks.x = (totalElements + threadsPerBlock - 1) / threadsPerBlock;
 	}
-	CudaReduceSumAxisZero<<<blocks, threads>>>(inPtr, outPtr, input->shape[0], threadsNeeded);
+	CudaReduceSumAxisZero<<<blocks, threads>>>(inPtr, outPtr, input->shape[0], totalElements);
   return 0;
 }
 
@@ -228,7 +228,7 @@ int DLGpuMatrixElementwiseMultiply(const DLArrayHandle matA,
 		threads.x = threadsPerBlock;
 		blocks.x = (totalElements + threadsPerBlock - 1)/threadsPerBlock;
 	}
-	CudaMatrixElementwiseMultiply<<<blocks, threads>>>(totalElements, inputA, inputB, outData);
+	CudaMatrixElementwiseMultiply<<<blocks, threads>>>(totalElements, matAPtr, matBPtr, outData);
   return 0;
 }
 
@@ -312,7 +312,7 @@ int DLGpuRelu(const DLArrayHandle input, DLArrayHandle output) {
 	dim3 blockSize, gridSize;
 	int threadsPerBlock = 1024;
 	if (totalElements <= threadsPerBlock){
-		blockSize.x = elements;
+		blockSize.x = totalElements;
 		gridSize.x = 1;
 	}else{
 		blockSize.x = threadsPerBlock;
@@ -352,7 +352,7 @@ int DLGpuReluGradient(const DLArrayHandle input, const DLArrayHandle in_grad,
 		threads.x = threadsPerBlock;
 		blocks.x = (totalElements + threadsPerBlock - 1) / threadsPerBlock;
 	}
-	CudaReluGradient<<<blocks, threads>>>(totalElements, inputPtr, inGradPtr, outputPtr);
+	CudaReluGradient<<<blocks, threads>>>(totalElements, inPtr, inGradPtr, outputPtr);
   return 0;
 }
 
