@@ -153,8 +153,7 @@ class AddOp(Op):
     def infer_shape(self, node, input_shapes):
         """Need to handle input_vals[0].shape != input_vals[1].shape"""
         """TODO: Your code here"""
-        assert input_shapes[0] == input_shapes[1]
-        return input_shapes[0]
+        return broadcast_rule(input_shapes[0], input_shapes[1])
 
 
 class AddByConstOp(Op):
