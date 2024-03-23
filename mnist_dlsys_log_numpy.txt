@@ -1,0 +1,44 @@
+Build logistic regression model...
+Loading data...
+Start training loop...
+epoch 0
+feed shapes: 
+
+{<dlsys.autodiff.Node object at 0x7fa2e66e6b90>: (1000, 784), <dlsys.autodiff.Node object at 0x7fa2e66e6b30>: (1000, 10), <dlsys.autodiff.Node object at 0x7fa2e66e6aa0>: (784, 10), <dlsys.autodiff.Node object at 0x7fa2e66e6c50>: (10,)}
+Node: X, Inferred shape: (1000, 784)
+Node: y_, Inferred shape: (1000, 10)
+Node: W1, Inferred shape: (784, 10)
+Node: b1, Inferred shape: (10,)
+Node: MatMul(X,W1,False,False), Inferred shape: (1000, 10)
+Node: BroadcastTo(b1,MatMul(X,W1,False,False).shape), Inferred shape: (1000, 10)
+Node: (MatMul(X,W1,False,False)+BroadcastTo(b1,MatMul(X,W1,False,False).shape)), Inferred shape: (1000, 10)
+Node: SoftmaxXEntropy((MatMul(X,W1,False,False)+BroadcastTo(b1,MatMul(X,W1,False,False).shape)),y_), Inferred shape: (1,)
+Node: Softmax((MatMul(X,W1,False,False)+BroadcastTo(b1,MatMul(X,W1,False,False).shape))), Inferred shape: (1000, 10)
+Node: (y_*-1), Inferred shape: (1000, 10)
+Node: (Softmax((MatMul(X,W1,False,False)+BroadcastTo(b1,MatMul(X,W1,False,False).shape)))+(y_*-1)), Inferred shape: (1000, 10)
+Node: Oneslike(SoftmaxXEntropy((MatMul(X,W1,False,False)+BroadcastTo(b1,MatMul(X,W1,False,False).shape)),y_)), Inferred shape: (1,)
+Node: ((Softmax((MatMul(X,W1,False,False)+BroadcastTo(b1,MatMul(X,W1,False,False).shape)))+(y_*-1))*Oneslike(SoftmaxXEntropy((MatMul(X,W1,False,False)+BroadcastTo(b1,MatMul(X,W1,False,False).shape)),y_))), Inferred shape: (1000, 10)
+Node: Zeroslike(MatMul(X,W1,False,False)), Inferred shape: (1000, 10)
+Node: (((Softmax((MatMul(X,W1,False,False)+BroadcastTo(b1,MatMul(X,W1,False,False).shape)))+(y_*-1))*Oneslike(SoftmaxXEntropy((MatMul(X,W1,False,False)+BroadcastTo(b1,MatMul(X,W1,False,False).shape)),y_)))+Zeroslike(MatMul(X,W1,False,False))), Inferred shape: (1000, 10)
+Node: MatMul(X,(((Softmax((MatMul(X,W1,False,False)+BroadcastTo(b1,MatMul(X,W1,False,False).shape)))+(y_*-1))*Oneslike(SoftmaxXEntropy((MatMul(X,W1,False,False)+BroadcastTo(b1,MatMul(X,W1,False,False).shape)),y_)))+Zeroslike(MatMul(X,W1,False,False))),True,False), Inferred shape: (784, 10)
+Node: ReduceSumAxisZero(((Softmax((MatMul(X,W1,False,False)+BroadcastTo(b1,MatMul(X,W1,False,False).shape)))+(y_*-1))*Oneslike(SoftmaxXEntropy((MatMul(X,W1,False,False)+BroadcastTo(b1,MatMul(X,W1,False,False).shape)),y_)))), Inferred shape: (10,)
+[0.52748245]
+epoch 1
+[0.45612256]
+epoch 2
+[0.42577374]
+epoch 3
+[0.40820537]
+epoch 4
+[0.39644748]
+epoch 5
+[0.38786614]
+epoch 6
+[0.38123227]
+epoch 7
+[0.37589005]
+epoch 8
+[0.37145495]
+epoch 9
+[0.36768534]
+validation set accuracy=0.922300

@@ -1,0 +1,5 @@
+/.config
+/.ipynb_checkpoints
+/.pytest_cache
+/.vscode
+/content

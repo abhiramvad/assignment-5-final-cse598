@@ -1,0 +1,21 @@
+======================================= test session starts ========================================
+platform linux -- Python 3.10.12, pytest-7.4.4, pluggy-1.4.0 -- /usr/bin/python3
+cachedir: .pytest_cache
+rootdir: /content
+plugins: anyio-3.7.1
+collecting ... collected 12 items
+
+tests/test_gpu_op.py::test_array_set PASSED                                                  [  8%]
+tests/test_gpu_op.py::test_broadcast_to PASSED                                               [ 16%]
+tests/test_gpu_op.py::test_reduce_sum_axis_zero PASSED                                       [ 25%]
+tests/test_gpu_op.py::test_matrix_elementwise_add PASSED                                     [ 33%]
+tests/test_gpu_op.py::test_matrix_elementwise_add_by_const PASSED                            [ 41%]
+tests/test_gpu_op.py::test_matrix_elementwise_multiply PASSED                                [ 50%]
+tests/test_gpu_op.py::test_matrix_elementwise_multiply_by_const PASSED                       [ 58%]
+tests/test_gpu_op.py::test_matrix_multiply PASSED                                            [ 66%]
+tests/test_gpu_op.py::test_relu PASSED                                                       [ 75%]
+tests/test_gpu_op.py::test_relu_gradient PASSED                                              [ 83%]
+tests/test_gpu_op.py::test_softmax PASSED                                                    [ 91%]
+tests/test_gpu_op.py::test_softmax_cross_entropy PASSED                                      [100%]
+
+======================================== 12 passed in 1.73s ========================================
