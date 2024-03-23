@@ -61,21 +61,21 @@ __global__ void cudaArraySetValue(int len, float *arr, float value){
 
 int DLGpuArraySet(DLArrayHandle arr, float value) { 
   /* TODO: Your code here */
-  int totalElements = 1;
+  int blockThreads = 1024;
+	int numThreads = 1;
 	for (int i=0; i < arr->ndim; i++){
-		totalElements *= arr->shape[i];
+		numThreads = numThreads * arr->shape[i];
 	}
-  float *arrData = (float *)arr->data;
+  float *data = (float *)arr->data;
 	dim3 threads, blocks;
-	int threadsPerBlock = 1024;
-	if (totalElements <= threadsPerBlock){
-		threads.x = totalElements;
+	if (numThreads <= blockThreads){
+		threads.x = numThreads;
 		blocks.x = 1;
 	}else{
-		threads.x = threadsPerBlock;
-		blocks.x = (totalElements + threadsPerBlock -1) / threadsPerBlock;
+		threads.x = blockThreads;
+		blocks.x = (numThreads + blockThreads -1)/blockThreads;
 	}
-	cudaArraySetValue<<<blocks, threads>>>(totalElements, arrData, value);
+	cudaArraySetValue<<<blocks, threads>>>(numThreads, data, value);
   return 0;
 }
 
@@ -89,25 +89,26 @@ __global__ void cudaBuildOutputArray(int in_threads, int out_threads, const floa
 
 int DLGpuBroadcastTo(const DLArrayHandle input, DLArrayHandle output) {
   /* TODO: Your code here */
-  int inputSize = 1, outputSize = 1;
+  int inThreads = 1; 
+	int outThreads = 1;
+	int blockThreads = 1024;
 	for(int i = 0; i < input->ndim; i++){
-		inputSize *= input->shape[i];
+		inThreads = inThreads * input->shape[i];
 	}
 	for(int i = 0; i < output->ndim; i++){
-		outputSize *= output->shape[i];
+		outThreads = outThreads * output->shape[i];
 	}
-	const float *inPtr = (const float*)input->data; 
-	float *outPtr = (float*)output->data;
+	const float *inData = (const float*)input->data; 
+	float *outData = (float*)output->data;
 	dim3 threads, blocks;
-	int threadsPerBlock = 1024;
-	if (inputSize <= threadsPerBlock){
-		threads.x = inputSize;
+	if (inThreads <= blockThreads){
+		threads.x = inThreads;
 		blocks.x = 1;
 	}else{
-		threads.x = threadsPerBlock;
-		blocks.x = (outputSize + threadsPerBlock -1) / threadsPerBlock;
+		threads.x = blockThreads;
+		blocks.x = (outThreads + blockThreads -1)/blockThreads;
 	}
-	cudaBuildOutputArray<<<blocks, threads>>>(inputSize, outputSize, inPtr, outPtr);
+	cudaBuildOutputArray<<<blocks, threads>>>(inThreads, outThreads, inData, outData);
 	return 0;
 }
 
@@ -123,22 +124,22 @@ __global__ void CudaReduceSumAxisZero(const float *inData, float *finalOutput, i
 
 int DLGpuReduceSumAxisZero(const DLArrayHandle input, DLArrayHandle output) {
   /* TODO: Your code here */
-  int totalElements = 1;
+  int blockThreads = 1024;
+	int numThreads = 1;
 	for (int i = 1; i < input->ndim; i++){
-		totalElements *= input->shape[i];
+		numThreads = numThreads * input->shape[i];
 	}
 	dim3 threads, blocks;
-	float *outPtr = (float *)output->data;
-	const float *inPtr = (const float *)input->data;
-	int threadsPerBlock = 1024;
-	if (totalElements <= threadsPerBlock){
-		threads.x = totalElements;
+	float *outData = (float *)output->data;
+	const float *inData = (const float *)input->data;
+	if (numThreads <= blockThreads){
+		threads.x = numThreads;
 		blocks.x = 1;
 	}else{
-		threads.x = threadsPerBlock;
-		blocks.x = (totalElements + threadsPerBlock - 1) / threadsPerBlock;
+		threads.x = blockThreads;
+		blocks.x = (numThreads + blockThreads - 1)/blockThreads;
 	}
-	CudaReduceSumAxisZero<<<blocks, threads>>>(inPtr, outPtr, input->shape[0], totalElements);
+	CudaReduceSumAxisZero<<<blocks, threads>>>(inData, outData, input->shape[0], numThreads);
   return 0;
 }
 
@@ -152,23 +153,23 @@ __global__ void CudaMatrixElementwiseAdd(int input, const float *input_a, const 
 int DLGpuMatrixElementwiseAdd(const DLArrayHandle matA,
                               const DLArrayHandle matB, DLArrayHandle output) {
   /* TODO: Your code here */
-	int totalElements = 1;
-	for (int i = 0; i < matA->ndim; i++){
-		totalElements *= matA->shape[i];
-	}
-	const float *matAPtr = (const float *)matA->data;
-	const float *matBPtr = (const float *)matB->data;
-	float *outputPtr = (float *)output->data;
+	int numThreads = 1;
+	int blockThreads = 1024;
 	dim3 threads, blocks;
-	int threadsPerBlock = 1024;
-	if (totalElements <= threadsPerBlock){
-		threads.x = totalElements;
+	for (int i = 0; i < matA->ndim; i++){
+		numThreads = numThreads * matA->shape[i];
+	}
+	const float *inputA = (const float *)matA->data;
+	const float *inputB = (const float *)matB->data;
+	float *outData = (float *)output->data;
+	if (numThreads <= blockThreads){
+		threads.x = numThreads;
 		blocks.x = 1;
 	}else{
-		threads.x = threadsPerBlock;
-		blocks.x = (totalElements + threadsPerBlock - 1) / threadsPerBlock;
+		threads.x = blockThreads;
+		blocks.x = (numThreads + blockThreads - 1)/blockThreads;
 	}
-	CudaMatrixElementwiseAdd<<<blocks, threads>>>(totalElements, matAPtr, matBPtr, outputPtr);
+	CudaMatrixElementwiseAdd<<<blocks, threads>>>(numThreads, inputA, inputB, outData);
   return 0;
 }
 
@@ -182,22 +183,22 @@ __global__ void CudaMatrixElementwiseAddByConst(int input, const float *inputA, 
 int DLGpuMatrixElementwiseAddByConst(const DLArrayHandle input, float val,
                                      DLArrayHandle output) {
   /* TODO: Your code here */
-	int totalElements = 1;
+	int numThreads = 1;
+	int blockThreads = 1024;
 	dim3 threads, blocks;
 	for (int i = 0; i < input->ndim; i++){
-		totalElements = totalElements * input->shape[i];
+		numThreads = numThreads * input->shape[i];
 	}
-	const float *inPtr = (const float *)input->data;
-	float *outPtr = (float *)output->data;
-	int threadsPerBlock = 1024;
-	if (totalElements <= threadsPerBlock){
-		threads.x = totalElements;
+	const float *inputA = (const float *)input->data;
+	float *outData = (float *)output->data;
+	if (numThreads <= blockThreads){
+		threads.x = numThreads;
 		blocks.x = 1;
 	}else{
-		threads.x = threadsPerBlock;
-		blocks.x = (totalElements + threadsPerBlock - 1)/threadsPerBlock;
+		threads.x = blockThreads;
+		blocks.x = (numThreads + blockThreads - 1)/blockThreads;
 	}
-	CudaMatrixElementwiseAddByConst<<<blocks, threads>>>(totalElements, inPtr, val, outPtr);
+	CudaMatrixElementwiseAddByConst<<<blocks, threads>>>(numThreads, inputA, val, outData);
   return 0;
 }
 
@@ -212,23 +213,23 @@ int DLGpuMatrixElementwiseMultiply(const DLArrayHandle matA,
                                    const DLArrayHandle matB,
                                    DLArrayHandle output) {
   /* TODO: Your code here */
-	int totalElements = 1;
+	int numThreads = 1;
+	int blockThreads = 1024;
 	dim3 threads, blocks;
 	for (int i = 0; i < matA->ndim; i++){
-		totalElements = totalElements * matA->shape[i];
+		numThreads = numThreads * matA->shape[i];
 	}
-	const float *matAPtr = (const float *)matA->data;
-	const float *matBPtr = (const float *)matB->data;
+	const float *inputA = (const float *)matA->data;
+	const float *inputB = (const float *)matB->data;
 	float *outData = (float *)output->data;
-	int threadsPerBlock = 1024;
-	if (totalElements <= threadsPerBlock){
-		threads.x = totalElements;
+	if (numThreads <= blockThreads){
+		threads.x = numThreads;
 		blocks.x = 1;
 	}else{
-		threads.x = threadsPerBlock;
-		blocks.x = (totalElements + threadsPerBlock - 1)/threadsPerBlock;
+		threads.x = blockThreads;
+		blocks.x = (numThreads + blockThreads - 1)/blockThreads;
 	}
-	CudaMatrixElementwiseMultiply<<<blocks, threads>>>(totalElements, matAPtr, matBPtr, outData);
+	CudaMatrixElementwiseMultiply<<<blocks, threads>>>(numThreads, inputA, inputB, outData);
   return 0;
 }
 
@@ -242,23 +243,23 @@ __global__ void CudaMatrixElementwiseMultiplyConst(int input, const float *input
 int DLGpuMatrixMultiplyByConst(const DLArrayHandle input, float val,
                                DLArrayHandle output) {
   /* TODO: Your code here */
-  	int totalElements = 1;
+  int numThreads = 1;
+	int blockThreads = 1024;
 	dim3 threads, blocks;
 	for (int i = 0; i < input->ndim; i++){
-		totalElements = totalElements * input->shape[i];
+		numThreads = numThreads * input->shape[i];
 	}
-	const float *inPtr = (const float *)input->data;
-	float *outPtr = (float *)output->data;
-	int threadsPerBlock = 1024;
-	if (totalElements <= threadsPerBlock){
-		threads.x = totalElements;
+	const float *inputA = (const float *)input->data;
+	float *outData = (float *)output->data;
+	if (numThreads <= blockThreads){
+		threads.x = numThreads;
 		blocks.x = 1;
 	}else{
-		threads.x = threadsPerBlock;
-		blocks.x = (totalElements + threadsPerBlock - 1)/threadsPerBlock;
+		threads.x = blockThreads;
+		blocks.x = (numThreads + blockThreads - 1)/blockThreads;
 	}
-	CudaMatrixElementwiseMultiplyConst<<<blocks, threads>>>(totalElements, inPtr, val, outPtr);
-  	return 0;
+	CudaMatrixElementwiseMultiplyConst<<<blocks, threads>>>(numThreads, inputA, val, outData);
+  return 0;
 }
 
 int DLGpuMatrixMultiply(const DLArrayHandle matA, bool transposeA,
@@ -303,22 +304,22 @@ __global__ void CudaRelu(int len, const float *inData, float *finalOutput){
 
 int DLGpuRelu(const DLArrayHandle input, DLArrayHandle output) {
   /* TODO: Your code here */
-  int totalElements = 1;
+  int numThreads = 1;
+	int blockThreads = 1024;
 	for (int i = 0; i < input->ndim; i++){
-		totalElements *= input->shape[i];
+		numThreads = numThreads * input->shape[i];
 	}
-	const float *inPtr = (const float *)input->data;
-	float *outPtr = (float *)output->data;
-	dim3 blockSize, gridSize;
-	int threadsPerBlock = 1024;
-	if (totalElements <= threadsPerBlock){
-		blockSize.x = totalElements;
-		gridSize.x = 1;
+	const float *inData = (const float *)input->data;
+	float *outData = (float *)output->data;
+	dim3 blocks, threads;
+	if (numThreads <= blockThreads){
+		threads.x = numThreads;
+		blocks.x = 1;
 	}else{
-		blockSize.x = threadsPerBlock;
-		gridSize.x = (totalElements + threadsPerBlock - 1) / threadsPerBlock;
+		threads.x = blockThreads;
+		blocks.x = (numThreads + blockThreads - 1)/blockThreads;
 	}
-	CudaRelu<<<gridSize, blockSize>>>(totalElements, inPtr, outPtr);
+	CudaRelu<<<blocks, threads>>>(numThreads, inData, outData);
   return 0;
 }
 
@@ -336,23 +337,23 @@ __global__ void CudaReluGradient(int len, const float *inData, const float *grad
 int DLGpuReluGradient(const DLArrayHandle input, const DLArrayHandle in_grad,
                       DLArrayHandle output) {
   /* TODO: Your code here */
-  int totalElements = 1;
+  int numThreads = 1;
+	int blockThreads = 1024;
 	for (int i = 0; i < input->ndim; i++){
-		totalElements *= input->shape[i];
+		numThreads = numThreads * input->shape[i];
 	}
-	const float *inPtr = (const float *)input->data;
-	const float *inGradPtr = (const float *)in_grad->data;
-	float *outputPtr = (float *)output->data;
+	const float *inData = (const float *)input->data;
+	const float *gradient = (const float *)in_grad->data;
+	float *outData = (float *)output->data;
 	dim3 blocks, threads;
-	int threadsPerBlock = 1024;
-	if (totalElements <= threadsPerBlock){
-		threads.x = totalElements;
+	if (numThreads <= blockThreads){
+		threads.x = numThreads;
 		blocks.x = 1;
 	}else{
-		threads.x = threadsPerBlock;
-		blocks.x = (totalElements + threadsPerBlock - 1) / threadsPerBlock;
+		threads.x = blockThreads;
+		blocks.x = (numThreads + blockThreads - 1)/blockThreads;
 	}
-	CudaReluGradient<<<blocks, threads>>>(totalElements, inPtr, inGradPtr, outputPtr);
+	CudaReluGradient<<<blocks, threads>>>(numThreads, inData, gradient ,outData);
   return 0;
 }
 
@@ -384,21 +385,21 @@ int DLGpuSoftmax(const DLArrayHandle input, DLArrayHandle output) {
   /* TODO: Your code here */
   int rows, cols;
 	dim3 threads;
-	int threadsPerBlock = 1024;
+	int blockThreads = 1024;
 	rows = input->shape[0];
 	cols = input->shape[1];
 	
-	const float *inPtr = (const float *)input->data;
-	float *outPtr = (float *)output->data;
+	const float *inData = (const float *)input->data;
+	float *outData = (float *)output->data;
 	
-	if (rows <= threadsPerBlock) {
+	if (rows <= blockThreads) {
 		threads.x = rows;
 	}else{
-		threads.x = threadsPerBlock;
-		threads.y = (rows + threadsPerBlock - 1) / threadsPerBlock;
+		threads.x = blockThreads;
+		threads.y = (rows + blockThreads - 1) / blockThreads;
 	}
 
-	CudaSoftmax<<<1, threads, rows * sizeof(float)>>>(inPtr, outPtr, rows, cols);
+	CudaSoftmax<<<1, threads, rows * sizeof(float)>>>(inData, outData, rows, cols);
   return 0;
 }
 
